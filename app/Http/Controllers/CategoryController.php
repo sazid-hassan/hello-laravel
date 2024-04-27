@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -33,9 +34,14 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
+    public function show($id)
     {
-        //
+        try {
+            $category = Category::findOrFail($id);
+            return new JsonResponse($category);
+        } catch (ModelNotFoundException $exception) {
+            return response()->json(['error' => 'Category not found.'], 404);
+        }
     }
 
     /**
@@ -44,13 +50,21 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         //
+        $category->update($request->all());
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Category $category)
+
+    public function destroy($id)
     {
-        //
+        $category = Category::findOrFail($id);
+        if ($category->products()->exists()) {
+            return response()->json(['error' => 'Cannot delete category because it has associated products.'], 422);
+        }
+
+        $category->delete();
+
+        return "Category Successfully Deleted";
     }
+
+
 }
