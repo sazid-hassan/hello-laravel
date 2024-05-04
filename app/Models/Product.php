@@ -15,6 +15,7 @@ class Product extends Model
         'slug',
         'desc',
         'price',
-        'quantity'
+        'quantity',
+        'category_id'
     ];
 }
